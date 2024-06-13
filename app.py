@@ -20,8 +20,8 @@ def fetch_context(operation_id, query):
     return r.json()
 
 
-with st.spinner("Fetching context..."):
-    repos_to_ops = fetch_available_repos()
+with st.spinner("Fetching repos..."):
+    st.session_state.repos_to_ops = fetch_available_repos()
 
 
 def format_context_item(i):
@@ -31,13 +31,25 @@ def format_context_item(i):
 
 
 with st.form("query"):
-    query = st.text_input(
-        "query", placeholder="Where is pool defined?", value="Where is pool defined?"
+    col1, col2, col3 = st.columns(3)
+    repo = col1.selectbox(
+        "Repo", st.session_state.repos_to_ops.keys(), label_visibility="collapsed"
     )
-    repo = st.selectbox("Repo", repos_to_ops.keys())
-    if st.form_submit_button("Fetch context"):
+
+    query = col2.text_input(
+        "query",
+        placeholder="query",
+        #        value="Where is pool defined?",
+        label_visibility="collapsed",
+    )
+    if col3.form_submit_button("Fetch context"):
+        if query == "":
+            st.error("Please provide a query")
+            st.stop()
         with st.spinner("Fetching context..."):
-            st.session_state.ctx = fetch_context(repos_to_ops[repo], query)
+            st.session_state.ctx = fetch_context(
+                st.session_state.repos_to_ops[repo], query
+            )
 
 if "ctx" in st.session_state:
     emb, met = [], []
