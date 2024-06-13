@@ -25,7 +25,9 @@ with st.spinner("Fetching context..."):
 
 
 def format_context_item(i):
-    return "{}#{}-{}".format(i["fileName"], i.get("lineFrom", 0), i["lineTo"])
+    return "{}#{}-{}".format(
+        i["fileName"], i.get("lineFrom", 0), i["lineTo"], i["indexerScore"]
+    )
 
 
 with st.form("query"):
@@ -49,24 +51,22 @@ if "ctx" in st.session_state:
         option = st.selectbox(
             "embeddings",
             emb,
-            format_func=lambda i: "{}#{}-{}".format(
-                i["fileName"], i.get("lineFrom", 0), i["lineTo"]
-            ),
+            format_func=format_context_item,
             index=0,
         )
         print(format_context_item(option))
         for i in emb:
             if format_context_item(i) == format_context_item(option):
                 c = st.code(i["content"])
+                left_column.write("Indexer score: {}".format(i["indexerScore"]))
     with right_column:
         option = st.selectbox(
             "metadata",
             met,
-            format_func=lambda i: "{}#{}-{}".format(
-                i["fileName"], i.get("lineFrom", 0), i["lineTo"]
-            ),
+            format_func=format_context_item,
             index=0,
         )
         for i in met:
             if format_context_item(i) == format_context_item(option):
                 st.code(i["content"])
+                right_column.write("Indexer score: {}".format(i["indexerScore"]))
